@@ -2,7 +2,6 @@ provider "google" {
   access_token = var.access_token
   project     = var.project
   region      = var.region
-  zone        = var.zone
 }
 
 resource "google_container_cluster" "awx_cluster" {

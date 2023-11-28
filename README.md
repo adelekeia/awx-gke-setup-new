@@ -4,6 +4,21 @@ This terraform code will create a GKE cluster, deploy the latest version of AWX,
 
 To run it:
 
+* Set the project name 
+    ```
+    export TF_VAR_project=PROJECT_NAME
+    ```
+
+* Set the GKE cluster region 
+    ```
+    export TF_VAR_region=us-central1
+    ```
+
+* Set the GKE cluster zone
+    ```
+    export TF_VAR_zone=us-central1-a
+    ```
+
 * Provide Access Token 
     ```
     export TF_VAR_access_token=$(gcloud auth print-access-token)
