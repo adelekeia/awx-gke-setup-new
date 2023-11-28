@@ -14,11 +14,6 @@ To run it:
     export TF_VAR_region=us-central1
     ```
 
-* Set the GKE cluster zone
-    ```
-    export TF_VAR_zone=us-central1-a
-    ```
-
 * Provide Access Token 
     ```
     export TF_VAR_access_token=$(gcloud auth print-access-token)
