@@ -6,13 +6,11 @@ provider "google" {
 
 resource "google_container_cluster" "awx_cluster" {
   name     = var.cluster_name
-  location = var.region  # Replace with your desired region
- 
-  min_master_version = "1.26.5-gke.2700"  # Replace with the desired Kubernetes version
+  location = var.region
   initial_node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1"
+    machine_type = "n1-standard-1"    #"n1-standard-8" #"n1-standard-1"
     disk_type    = "pd-ssd"
     disk_size_gb = "20"
     image_type = "UBUNTU_CONTAINERD"
@@ -27,8 +25,6 @@ provider "kubernetes" {
   config_context = "gke_${var.project}_${var.region}_${var.cluster_name}"
 }
 
-
-# Provisioner to run local commands
 resource "null_resource" "helm_install" {
 
   depends_on = [google_container_cluster.awx_cluster]
@@ -38,7 +34,9 @@ resource "null_resource" "helm_install" {
       gcloud container clusters get-credentials ${var.cluster_name} \
         --region=${var.region} --project=${var.project}
 
-      helm install my-awx-operator awx-operator/awx-operator -n awx --create-namespace -f ../awx-operator/config.yaml
+      helm install my-awx-operator awx-operator/awx-operator -n awx --create-namespace -f awx-operator/config.yaml
+      helm repo add pulp-operator https://github.com/pulp/pulp-k8s-resources/raw/main/helm-charts/ --force-update
+      kubectl apply -f awx-operator/ingress.yaml
     EOT
   }
 }
@@ -48,21 +46,16 @@ resource "null_resource" "delay" {
   depends_on = [null_resource.helm_install]
 
   provisioner "local-exec" {
-    command = "sleep 150"  # Sleep for 2 minutes 30 seconds (150 seconds)
+    command = "sleep 450"  # Sleep for 7 minutes 30 seconds (450 seconds)
   }
 }
 
-resource "null_resource" "ingress_trf_bootstrap" {
-
+data "external" "login_details_pull" {
   depends_on = [null_resource.delay]
+  program = ["awx-operator/get_login_details.sh"]
+}
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      cd ${path.module}
-      cd ../ingress
-      pwd
-      terraform init
-      terraform apply -auto-approve
-    EOT
-  }
+# Display AWX url, username and password
+output "awx_login_details_display" {
+  value = "############################################## \nLogin to AWX with below details \nURL: http://${data.external.login_details_pull.result["ip"]} \nUsername: admin \nPassword: ${data.external.login_details_pull.result["password"]} \n##############################################"
 }

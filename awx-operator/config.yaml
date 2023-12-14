@@ -6,6 +6,9 @@ AWX:
     admin_user: admin
     service_type: NodePort
     nodeport_port: 30080
+    replicas: 2
+    task_replicas: 1 #3
+    web_replicas: 2 #3
 
   # configurations for external postgres instance
   postgres:

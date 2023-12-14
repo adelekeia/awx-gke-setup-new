@@ -21,7 +21,7 @@ To run it:
 
 * Switch to cluster directory and initialize terraform    
     ```
-    cd cluster && terraform init
+    terraform init
     ```
 
 * Run terraform and apply changes
